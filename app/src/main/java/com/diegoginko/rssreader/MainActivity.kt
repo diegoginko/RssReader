@@ -21,7 +21,8 @@ class MainActivity : AppCompatActivity() {
 
         Log.d(TAG,"llamado a onCreate")
         val descargarDatos = DescargarDatos()
-        descargarDatos.execute("Ruta URL")
+        val rutaRss : String = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=10/xml"
+        descargarDatos.execute(rutaRss)
         Log.d(TAG,"Terminó el onCreate")
     }
 
@@ -42,41 +43,64 @@ class MainActivity : AppCompatActivity() {
                 }
                 return rssFeed
             }
-        }
-    }
 
-    private fun descargarXML(direccionUrl : String?) : String{
-        val xmlResult = StringBuilder()
+            private fun descargarXML(direccionUrl : String?) : String{
+                val xmlResult = StringBuilder()
 
-        try {
-            val url = URL(direccionUrl)
-            val conexion : HttpURLConnection = url.openConnection() as HttpURLConnection
-            val respuesta = conexion.responseCode
-            Log.d(TAG, "descargarXML | Codigo de respuesta: $respuesta")
+                try {
+                    val url = URL(direccionUrl)
+                    val conexion : HttpURLConnection = url.openConnection() as HttpURLConnection
+                    val respuesta = conexion.responseCode
+                    Log.d(TAG, "descargarXML | Codigo de respuesta: $respuesta")
 
-//            val inputStream = conexion.inputStream
-//            val inputStreamReader = InputStreamReader(inputStream)
-//            val reader = BufferedReader(inputStreamReader)
-            val reader = BufferedReader(InputStreamReader(conexion.inputStream)) //Estas clases trabajan juntas asi que no tiene sentido ponerlas separadas
+//                    val reader = BufferedReader(InputStreamReader(conexion.inputStream)) //Estas clases trabajan juntas asi que no tiene sentido ponerlas separadas
+//
+//                    //se leen en cadenas de char, por lo que hay que armar el string
+//                    val inputBuffer = CharArray(500)
+//                    var charsRead = 0
+//                    while(charsRead <= 0){
+//                        charsRead = reader.read(inputBuffer)
+//                        if (charsRead > 0){
+//                            xmlResult.append(String(inputBuffer, 0, charsRead))
+//                        }
+//                    }
+//                    reader.close() //Cierro el reader que cierra lo que tiene anidado dentro
 
-            //se leen en cadenas de char, por lo que hay que armar el string
-            val inputBuffer = CharArray(500)
-            var charsRead = 0
-            while(charsRead <= 0){
-                charsRead = reader.read(inputBuffer)
-                if (charsRead > 0){
-                    xmlResult.append(String(inputBuffer, 0, charsRead))
+                    val stream = conexion.inputStream
+                    stream.buffered().reader().use { reader ->
+                        xmlResult.append(reader.readText())
+                    } //Se reemplaza el codigo anterior por esto.
+
+
+                    return xmlResult.toString() //convierto el array de chars en string
+
+
+//                }catch (e : MalformedURLException){
+//                    Log.e(TAG, "descargarXML | URL invalida: ${e.message}")
+//
+//                }catch (e : IOException){
+//                    Log.e(TAG, "descargarXML | IOExeption leyendo los datos: ${e.message}")
+//                }
+//                catch (e : SecurityException){
+//                    Log.e(TAG, "descargarXML | Faltan permisos: ${e.message}")
+//                }catch ( e : Exception){
+//                    Log.e(TAG, "descargarXML | Exception no reconocida: ${e.message}")
+//                }
+                }catch (e : Exception){
+                    val mensajeError :  String
+                    when(e){
+                        is MalformedURLException -> mensajeError = "descargarXML | URL invalida: ${e.message}"
+                        is IOException -> mensajeError = "descargarXML | IOExeption leyendo los datos: ${e.message}"
+                        is SecurityException -> mensajeError = "descargarXML | Faltan permisos: ${e.message}"
+                        else -> mensajeError = "descargarXML | Exception no reconocida: ${e.message}"
+                    }
+                    Log.e(TAG, mensajeError)
                 }
+
+                return ""  //esto solo lo retorna si entro en algun catch
             }
-            
-
-        }catch (e : MalformedURLException){
-            Log.e(TAG, "descargarXML | URL invalida: ${e.message}")
-
-        }catch (e : IOException){
-            Log.e(TAG, "descargarXML | IOExeption leyendo los datos: ${e.message}")
-        }catch ( e : Exception){
-            Log.e(TAG, "descargarXML | Exception no reconocida: ${e.message}")
         }
     }
+
+
 }
