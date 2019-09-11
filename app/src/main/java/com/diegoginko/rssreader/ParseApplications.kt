@@ -22,7 +22,7 @@ class ParseApplications {
             var eventType = xpp.eventType
             var currentRecord = FeedEntry()
             while (eventType != XmlPullParser.END_DOCUMENT){
-                val tagName = xpp.name.toLowerCase()  // TODO: Cambiar a operador safe-call
+                val tagName = xpp.name?.toLowerCase()
                 when(eventType){
 
                     XmlPullParser.START_TAG -> {
@@ -32,7 +32,7 @@ class ParseApplications {
                         }
                     }
 
-                    XmlPullParser.TEXT -> xpp.text
+                    XmlPullParser.TEXT -> textValue = xpp.text
 
                     XmlPullParser.END_TAG -> {
                         Log.d(TAG, "Fin del tag " + tagName)
@@ -45,10 +45,10 @@ class ParseApplications {
                                     currentRecord = FeedEntry() //reinicio el objeto
                                 }
 
-                                "name" -> currentRecord.name = textValue
+                                "title" -> currentRecord.name = textValue
                                 "artist" -> currentRecord.artist = textValue
                                 "releaseDate" -> currentRecord.releaseDate = textValue
-                                "summary" -> currentRecord.summary = textValue
+                                //"summary" -> currentRecord.summary = textValue
                                 "image" -> currentRecord.imageURL = textValue
                             }
                         }
